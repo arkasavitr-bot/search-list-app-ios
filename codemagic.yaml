@@ -9,7 +9,8 @@ definitions:
   environment:
     automatic_ios_signing: &automatic_ios_signing
       groups:
-        # Update the environment variables in the Codemagic UI below as required
+        # Create this group in Codemagic UI: Team settings > Environment variables
+        # and add these variables inside it:
         # APPLE_ID
         # APP_SPECIFIC_PASSWORD
         # APP_STORE_CONNECT_ISSUER_ID
@@ -17,6 +18,7 @@ definitions:
         # APP_STORE_CONNECT_PRIVATE_KEY
         # APP_STORE_APP_ID
         # CERTIFICATE_PRIVATE_KEY
+        - ios_credentials
       vars:
         BUNDLE_ID: "com.example.yourapp"
         XCODE_WORKSPACE: "App.xcworspace"
@@ -86,8 +88,7 @@ workflows:
     name: iOS release
     <<: *instance_mac_m2
     environment:
-      <<: *automatic_ios_signing
-      <<: *env_versions
+      <<: [*automatic_ios_signing, *env_versions]
     triggering:
       events:
         - tag
@@ -106,14 +107,12 @@ workflows:
       - *ipa
       - *dsym
     publishing:
-      <<: *email_release
-      <<: *ios_app_store_publish
+      <<: [*email_release, *ios_app_store_publish]
   ios-staging:
     name: iOS develop
     <<: *instance_mac_m2
     environment:
-      <<: *automatic_ios_signing
-      <<: *env_versions
+      <<: [*automatic_ios_signing, *env_versions]
     triggering:
       events:
         - push
@@ -132,5 +131,4 @@ workflows:
       - *ipa
       - *xcode_log
     publishing:
-      <<: *email_develop
-      <<: *slack_publish
+      <<: [*email_develop, *slack_publish]
